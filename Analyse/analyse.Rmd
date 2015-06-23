@@ -58,6 +58,8 @@ Likert
 ======
 
 questions 1.2.12.14.15 traitent du niveau d'information (1et2) et du niveau de formation (12.14.15)
+Niveau d'information
+--------------------
 
 QUEST.1: Je me tiens au courant des dernières informations de la presse télévisée concernant le virus Ebola
 
@@ -69,10 +71,26 @@ summary(d$QUEST.2, na.rm = TRUE)
 tapply(d$QUEST.1, d$VILLE, mean)
 boxplot(d$QUEST.1 ~ d$VILLE)
 boxplot(d$QUEST.2 ~ d$VILLE)
-lik <- d[,2:3]
-l <- likert(lik, nlevels = 7)
+info <- d[,2:3]
+l <- likert(info, nlevels = 7)
 l
 plot(l)
 
+```
+
+Niveau de formation (12.14.15)
+-------------------
+
+12. Je pense être suffisamment informé(e) quant aux modes de transmissions du virus Ebola
+
+14. Je pense être suffisamment formé(e) pour m’habiller avec la tenue de protection face au virus Ebola
+
+15. Je pense être suffisamment formé(e) pour ôter la tenue de protection face au virus Ebola
+
+```{r}
+formation <- d[, c(13, 15:16)]
+l <- likert(formation, nlevels = 7)
+l
+plot(l)
 ```
 
