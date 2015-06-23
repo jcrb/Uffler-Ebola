@@ -1,0 +1,78 @@
+---
+title: "Analyse"
+author: "jcb"
+date: "21 juin 2015"
+output: html_document
+---
+
+Nettoyage
+=========
+
+Durée de la formation
+---------------------
+```{r}
+file <- "../data/TABLEAU EXCEL EBOLA 2015-modifie.csv"
+d <- read.csv(file)
+
+library(likert)
+
+d$DUREE <- as.character(d$DUREE)
+d$DUREE[is.na(d$DUREE)] <- "NON"
+d$DUREE <- as.factor(d$DUREE)
+d$DUREE <- factor(d$DUREE, levels = c("NON","< 6","6-12",">12"))
+
+```
+
+Analyse univariée
+=================
+
+Durée de la formation
+---------------------
+```{r}
+summary(d$DUREE)
+```
+
+
+Catégorie socio-professionnelle
+-------------------------------
+
+```{r}
+summary(d$CSP)
+```
+
+Ville
+-----
+```{r}
+summary(d$VILLE)
+
+table(d$VILLE, d$CSP)
+chisq.test(d$VILLE, d$CSP)
+
+
+table(d$VILLE, d$DUREE)
+fisher.test(d$VILLE, d$DUREE)
+
+```
+
+Likert
+======
+
+questions 1.2.12.14.15 traitent du niveau d'information (1et2) et du niveau de formation (12.14.15)
+
+QUEST.1: Je me tiens au courant des dernières informations de la presse télévisée concernant le virus Ebola
+
+QUEST.2: Je me tiens au courant des dernières informations de la presse écrite concernant le virus Ebola
+
+```{r}
+summary(d$QUEST.1, na.rm = TRUE)
+summary(d$QUEST.2, na.rm = TRUE)
+tapply(d$QUEST.1, d$VILLE, mean)
+boxplot(d$QUEST.1 ~ d$VILLE)
+boxplot(d$QUEST.2 ~ d$VILLE)
+lik <- d[,2:3]
+l <- likert(lik, nlevels = 7)
+l
+plot(l)
+
+```
+
