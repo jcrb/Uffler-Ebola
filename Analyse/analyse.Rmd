@@ -57,7 +57,8 @@ fisher.test(d$VILLE, d$DUREE)
 Likert
 ======
 
-questions 1.2.12.14.15 traitent du niveau d'information (1et2) et du niveau de formation (12.14.15)
+questions 1.2.12.14.15 traitent du niveau d'information (1 et2) et du niveau de formation (12.14.15)
+
 Niveau d'information
 --------------------
 
@@ -69,8 +70,11 @@ QUEST.2: Je me tiens au courant des dernières informations de la presse écrite
 summary(d$QUEST.1, na.rm = TRUE)
 summary(d$QUEST.2, na.rm = TRUE)
 tapply(d$QUEST.1, d$VILLE, mean)
-boxplot(d$QUEST.1 ~ d$VILLE)
-boxplot(d$QUEST.2 ~ d$VILLE)
+
+boxplot(d$QUEST.1 ~ d$VILLE, main = "Je me tiens au courant des dernières informations de la presse télévisée\n concernant le virus Ebola")
+
+boxplot(d$QUEST.2 ~ d$VILLE, main = "Je me tiens au courant des dernières informations de la presse écrite\n concernant le virus Ebola")
+
 info <- d[,2:3]
 l <- likert(info, nlevels = 7)
 l
