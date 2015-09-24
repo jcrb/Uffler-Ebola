@@ -22,3 +22,12 @@ je suis médecin
 iade
 ide
 ambulancier
+
+24 septembre 2015
+-----------------
+Les fichiers sourcr sant dans __data__:
+
+- TABLEAU EXCEL EBOLA 2015-modifie.xls est le fichier de départ
+- TABLEAU EXCEL EBOLA 2015-modifie.xls2 est une copie à priori identique au précédent
+- TABLEAU EXCEL EBOLA 2015-modifie.xls_3 est une copie où les colonnes devenues inutiles parceque regroupée, ont été supprimées
+- TABLEAU EXCEL EBOLA 2015-modifie.xls_3.csv est la version de travail.

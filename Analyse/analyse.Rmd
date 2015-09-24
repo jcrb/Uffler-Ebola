@@ -11,7 +11,7 @@ Nettoyage
 Durée de la formation
 ---------------------
 ```{r}
-file <- "../data/TABLEAU EXCEL EBOLA 2015-modifie.csv"
+file <- "../data/TABLEAU EXCEL EBOLA 2015-modifie_3.csv"
 d <- read.csv(file)
 
 library(likert)
