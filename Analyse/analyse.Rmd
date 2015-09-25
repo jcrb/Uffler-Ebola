@@ -28,7 +28,7 @@ est une variable ordinale (c'est à dire que le rang est significatif) variant d
     
 Les questions peuvent être regroupées pour former des scores intermédiaires:
 
-    - niveau d'information (1et2)
+    - niveau d'information (1 et 2)
     - niveau de formation (12.14.15)
     - sentiment provoqué par ebola (3.4.5.13)
     - estime de soi (6.7.8.9.10.11)
@@ -44,6 +44,7 @@ d <- read.csv(file)
 library(likert)
 library(gplots) # plotmeans
 library(multcomp) # comparaisons multiples
+library(psy) # cronbach
 
 d$DUREE <- as.character(d$DUREE)
 d$DUREE[is.na(d$DUREE)] <- "NON"
@@ -57,7 +58,10 @@ summary(d)
 Le fichier des données comporte `r n` lignes et `r ncol(d)` variables:
 ```{r, echo=FALSE, comment=""}
 names(d)
+c <- cronbach(d[, 2:16])
 ```
+
+Le __coefficient de Cronbach__ pour la partie score de Likert est de __`r round(c$alpha, 2)`__ ([interprétation du coefficient de Cronbach](http://www.wikiwand.com/en/Cronbach's_alpha)).
 
 Les colonnes 2 à 16 correspondent aux items de Likert et 17 à 21 sont des variables factorielles sauf "DUREE".
 
@@ -137,7 +141,10 @@ d$score.tot <- sg[, "score"]
 
 ```
 
+Le score  global peut varier entre `r score.min.theo` et `r score.max.theo`.
+
 ### Comparaisons des villes
+
 ```{r, echo=FALSE, comment=""}
 # comparaison des villes
 t.villes <- t.test(d$score.tot ~ d$VILLE)
