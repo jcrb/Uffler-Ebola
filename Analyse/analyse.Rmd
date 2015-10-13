@@ -3,9 +3,11 @@ title: "Questionnaire EBOLA"
 author: "JcB, SUffler"
 date: "21 juin 2015"
 output:
-  pdf_document:
-    toc: yes
   html_document:
+    keep_md: yes
+    number_sections: yes
+    toc: yes
+  pdf_document:
     toc: yes
 ---
 
@@ -207,7 +209,12 @@ summary(score.presse)
 hist(score.presse, main = "Score information par la presse", ylab = "Fréquence", xlab = "Score", col = "cornflowerblue", border = "white")
 d$score.presse <- score.presse
 table(d$CSP, d$score.presse)
-barplot(table(d$CSP, d$score.presse))
+
+barplot(table(d$CSP, d$score.presse), main = "Information par la presse", xlab = "Score", ylab = "Fréquence", col = c(1:4))
+legend("topright", legend = levels(d$CSP), col = 1:4, bty = "n", pch = 15)
+
+barplot(table(d$CSP, d$score.presse), main = "Information par la presse", xlab = "Score", ylab = "Fréquence", col = c(1:4), beside = TRUE)
+legend("topright", legend = levels(d$CSP), col = 1:4, bty = "n", pch = 15)
 
 # pas de différence entre les villes
 t.test(d$score.presse ~ d$VILLE)
