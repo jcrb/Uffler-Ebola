@@ -4,11 +4,12 @@ JcB, SUffler
 
 QR: Evaluation de l'anxiété face à la menace Ebola, au sein du personnel des urgences. Etude multicentrique portant sur deux villes universitaires (Reims et Strasbourg).
 
-Au cours des tests statistiques, une différence est considérée comme significative lorsque __p > 0.05__ (5%). Les tests statistiques utilisés:
+Au cours des tests statistiques, une différence est considérée comme significative lorsque __p < 0.05__ (5%). Les tests statistiques utilisés:
 
 - Test t de Student pour comparer 2 variables quantitatives
 - Analyse de la variance (ANOVA) pour comparer 3 variables quantitatives ou plus
 - Le test du Chi2 pour comparer 2 variables qualitatives ou le test exact de Fisher lorsque les effectifs sont faibles.
+- Une différence entre deux ou plusieurs groupes est considérée commme significative lorsque p < 0.05 (5%) [c'est à dire qu'il y a moins de 5 chances sur 100 que la différence observée soit due au hasard]
 
 Le questionnaire comprend 2 parties:
 
@@ -454,9 +455,9 @@ $`d$DUREE`
 >12-6-12 -3.957143 -18.0625656 10.148280 0.8842280
 ```
 
-Sentiment provoqué par ebola
+Sentiment d'inquiétude provoqué par ebola
 ============================
-questions 3.4.5.13 traitent du sentiment provoqué par ebola
+questions 3.4.5.13 traitent du sentiment d'inquiétude provoqué par ebola
 
 3. Le virus Ebola est une chose qui me préoccupe sur le plan professionnel
 4. Si j’avais le choix, je refuserais de prendre en charge un patient suspecté d’être contaminé par le virus Ebola
@@ -486,6 +487,10 @@ questions 3.4.5.13 traitent du sentiment provoqué par ebola
 
 ![](analyse_files/figure-html/unnamed-chunk-16-2.png) 
 
+Les 61% des personnels se sentent concernés par la problématique Ebola (question 3). Sur les autre items de ce sous-groupes, les inquiets et les non inquiets se partagent de manière assez équivalente.
+
+### Comparaisons des villes
+
 ```
 
 	Welch Two Sample t-test
@@ -499,6 +504,8 @@ sample estimates:
 mean in group REIMS mean in group STRAS 
            15.86207            17.67797 
 ```
+
+L'inquiétude semble légèrement plus importante à Reims, mais la différence entre les deux villes n'est pas significative (p = 0.0869).
 
 ### comparaison des CSP
 
@@ -514,7 +521,17 @@ Residuals   112   3711   33.14
 1 observation deleted due to missingness
 ```
 
-### comparaison des durées
+Aucune différence entre les CSP (p = 0.416).
+
+### comparaison de l'ancienneté de la formation:
+
+On considère 4 groupes:
+
+- pas formation (NON)
+- moins de 6 mois
+- 6 à 12 mois
+- plus de 12 mois
+
 
 ```
      NON      < 6     6-12      >12 
@@ -547,6 +564,7 @@ $`d$DUREE`
 >12-6-12 -3.957143 -18.0625656 10.148280 0.8842280
 ```
 
+Le niveau d'inquiétude n'est pas le même entre les groupes (p = 0.00008). L'inquiétude est la plus élevée dans le groupe des personnes non formées et le score d'inquiétude est statistiquement plus élevé que celui des personnes formées depuis moins de 6 mois (p = 0.0000308)
 
 estime de soi
 =============
@@ -600,6 +618,9 @@ sample estimates:
 mean in group REIMS mean in group STRAS 
            26.70690            27.84746 
 ```
+Globalement les personnes interrogées ont une bonne estime d'eux concernant leur professionalisme concernant la prise en charge de ce type de patient (question 9, 74% d'opinion favorable) et leur capacité à travailler avec d'autres professionnels de santé (question 7, 61% d'opinion favorable). Les opinions sont plus mesurées concernant la capacité à assurer des soins (q10) et à se protéger (q11) avec 55% et 50% d'opinion favorable. Cet optimisme prudent peut s'expliquer à l'absence de confrontation avec des cas réels. La question 6 avec moins de 50% d'opinion favorables tempère l'optimisme des question 9 et 7. En résumé une attitude plutôt raisonnable, sans triomphalisme ni d'inquiétute excessifs.
+
+Ce sentiment est partagé par les professionnels des deux villes (pas de différence, p = 0.29  )
 
 ### comparaison des CSP
 
@@ -615,6 +636,8 @@ Residuals   112   3840   34.29
 1 observation deleted due to missingness
 ```
 
+Ce sentiment est également partagé entre les difféentes catégories socio-professionnelles (pas de différence, p = 0.296)
+
 ### comparaison des durées
 
 ```
@@ -624,8 +647,8 @@ Residuals   112   3840   34.29
 
 ```
              Df Sum Sq Mean Sq F value   Pr(>F)    
-d$DUREE       3   2830   943.4   7.831 8.55e-05 ***
-Residuals   113  13614   120.5                     
+d$DUREE       3    545  181.82   5.989 0.000796 ***
+Residuals   113   3430   30.36                     
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ```
@@ -636,14 +659,56 @@ Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
   Tukey multiple comparisons of means
     95% family-wise confidence level
 
-Fit: aov(formula = d$score.tot ~ d$DUREE)
+Fit: aov(formula = d$score.estime ~ d$DUREE)
 
 $`d$DUREE`
-              diff         lwr       upr     p adj
-< 6-NON  12.293860   5.5919550 18.995764 0.0000308
-6-12-NON 10.183333  -0.5898612 20.956528 0.0710846
->12-NON   6.226190  -6.0690456 18.521427 0.5518801
-6-12-< 6 -2.110526 -11.7389035  7.517851 0.9403476
->12-< 6  -6.067669 -17.3732764  5.237938 0.5022800
->12-6-12 -3.957143 -18.0625656 10.148280 0.8842280
+                 diff        lwr       upr     p adj
+< 6-NON   5.392543860  2.0284793  8.756608 0.0003330
+6-12-NON  4.858333333 -0.5493415 10.266008 0.0945454
+>12-NON   5.386904762 -0.7847687 11.558578 0.1097848
+6-12-< 6 -0.534210526 -5.3672369  4.298816 0.9916136
+>12-< 6  -0.005639098 -5.6805620  5.669284 1.0000000
+>12-6-12  0.528571429 -6.5517370  7.608880 0.9973712
 ```
+
+Le fait d'être formé ou pas influence l'estime de soi. Les personnels non formés ont le score de confiance les plus bas (23,07) et ce score est statistiquement différent du score des personnels formés depuis moins de 6 mois (p = 0.00033). La comparaison avec les personnes formées il a plus de 6 mis ou de 12 mois est de peu de valeur compte tenu de la faiblesse des effectifs.
+
+Si on forme 3 groupes en regrouppant les personnes formées depuis 6 mois ou plus:
+
+- pas de formation (NON)
+- moins de 6 mois
+- plus de 6 mois
+
+la différence est plus nette:
+
+```
+##      < 6      > 6      NON 
+## 28.43421 28.11765 23.04167
+```
+
+![](analyse_files/figure-html/unnamed-chunk-24-1.png) 
+
+```
+##              Df Sum Sq Mean Sq F value   Pr(>F)    
+## d$DUREE       3    545  181.82   5.989 0.000796 ***
+## Residuals   113   3430   30.36                     
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+```
+
+```
+##   Tukey multiple comparisons of means
+##     95% family-wise confidence level
+## 
+## Fit: aov(formula = d$score.estime ~ d$DUREE)
+## 
+## $`d$DUREE`
+##                  diff        lwr       upr     p adj
+## < 6-NON   5.392543860  2.0284793  8.756608 0.0003330
+## 6-12-NON  4.858333333 -0.5493415 10.266008 0.0945454
+## >12-NON   5.386904762 -0.7847687 11.558578 0.1097848
+## 6-12-< 6 -0.534210526 -5.3672369  4.298816 0.9916136
+## >12-< 6  -0.005639098 -5.6805620  5.669284 1.0000000
+## >12-6-12  0.528571429 -6.5517370  7.608880 0.9973712
+```
+Au moins un des score est différent des autres (p = 0.0007). Le test de Tukey révèle que le score d'estime de soi des personnes non formées est statistiquement plus faible que celui des personnes formées, que ce soit à 6 mois (p = 0.00001) ou plus de 6 mois (p = 0.04). Par contre il n'y a pas de différence entre les score des personnels formés à 6mois et plus de 6 mois (p = 0.41).
