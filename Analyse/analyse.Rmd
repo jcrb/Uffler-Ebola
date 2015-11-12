@@ -1,72 +1,305 @@
 ---
-title: "Analyse"
-author: "jcb"
+title: "Questionnaire EBOLA"
+author: "JcB, SUffler"
 date: "21 juin 2015"
-output: html_document
+output:
+  pdf_document:
+    keep_tex: yes
+    number_sections: yes
+    toc: yes
+  html_document:
+    keep_md: yes
+    number_sections: yes
+    toc: yes
 ---
 
-Nettoyage
-=========
+Matériel et méthode
+===================
 
-Durée de la formation
----------------------
-```{r}
-file <- "../data/TABLEAU EXCEL EBOLA 2015-modifie.csv"
+__Question de Recherche__: Evaluation de l'anxiété face à la menace Ebola, au sein du personnel des urgences. Etude multicentrique portant sur deux villes universitaires (Reims et Strasbourg).
+
+Au cours des tests statistiques, une différence est considérée comme significative lorsque __p < 0.05__ (5%). Les tests statistiques utilisés:
+
+- Test t de Student pour comparer 2 variables quantitatives
+- Analyse de la variance (ANOVA) pour comparer 3 variables quantitatives ou plus
+- Le test du Chi2 pour comparer 2 variables qualitatives ou le test exact de Fisher lorsque les effectifs sont faibles.
+- Une différence entre deux ou plusieurs groupes est considérée commme significative lorsque p < 0.05 (5%) [c'est à dire qu'il y a moins de 5 chances sur 100 que la différence observée soit due au hasard]
+- La cohérence interne du questionnaire est estimée par le coefficient alpha de Cronbach
+
+La mesure de l'anxiété utilise une échelle de likert à 7 items ce qui permet aux répondants de ne pas prendre position sur une question. On obtient ainsi une représentation graphiques des réponses avec 3 zones:
+
+- plutôt contre (couleur dominante brune)
+- plutôt pour (couleur dominante verte)
+- indécis (couleur grise). La largeur de cette bande de couleur exprime le degré d'embaras que soulève la question dans le groupe (exprimé plus formellement par un pourcentage)
+
+Les représentations graphiques des groupes utilisent la représentation dite en __boite à moustaches__ (boxplot) qui permettent de représenter simultannément plusieurs paramètres et de comparer visuellement les groupes. 
+
+![boxplot](Boxplot.png)
+
+source: wikipedia (version anglaise).
+
+Le questionnaire comprend 2 parties:
+
+- des questions factorielles (Ville, catégorie socio-profesionnelle [CSP]) qui permettent de créer des sous groupes.
+- 15 questions sous forme d'items de Lickert (7 niveaux de réponses) constituant une échelle de Likert. Pour chaque item, la réponse 
+est une variable ordinale (c'est à dire que le rang est significatif) variant de 1 à 7. Le choix de la réponse possible est un nombre impair ce qui implicetement découpe l'éventail des réponses possibles en trois zones:
+    - zone de rejet (1 à 3)
+    - zone d'indécision (4)
+    - zone d'acceptation (5 à 7)
+    
+Les questions peuvent être regroupées pour former des scores intermédiaires:
+
+    - niveau d'information (1 et 2)
+    - niveau de formation (12.14.15)
+    - sentiment provoqué par ebola (3.4.5.13)
+    - estime de soi (6.7.8.9.10.11)
+
+Données générales
+===================
+
+```{r, echo=FALSE, comment="", message=FALSE}
+
+options(width=80, digits = 3)
+
+path <- "../"
+file <- paste0(path, "data/TABLEAU EXCEL EBOLA 2015-modifie_3.csv")
 d <- read.csv(file)
+d <- d[!is.na(d$NUMERO),] # ligne vide
 
 library(likert)
+library(gplots) # plotmeans
+library(multcomp) # comparaisons multiples
+library(psy) # cronbach
+source('~/Documents/CESU/Uffler-Ebola/rev_likert.R') # pour inverser une échelle de Likert
+
 
 d$DUREE <- as.character(d$DUREE)
 d$DUREE[is.na(d$DUREE)] <- "NON"
 d$DUREE <- as.factor(d$DUREE)
 d$DUREE <- factor(d$DUREE, levels = c("NON","< 6","6-12",">12"))
 
+n <- nrow(d)
+
+summary(d)
 ```
+Le fichier des données comporte `r n` lignes et `r ncol(d)` variables:
+```{r, echo=FALSE, comment=""}
+names(d)
+c <- cronbach(d[, 2:16])
+```
+
+Le __coefficient de Cronbach__ pour la partie score de Likert est de __`r round(c$alpha, 2)`__ ([interprétation du coefficient de Cronbach](http://www.wikiwand.com/en/Cronbach's_alpha)).
+
+Les colonnes 2 à 16 correspondent aux items de Likert et 17 à 21 sont des variables factorielles sauf "DUREE".
+
+Répartition des participants:
+
+```{r, echo=FALSE, comment=""}
+table(d$VILLE, d$CSP)
+x2 <- chisq.test(d$VILLE, d$CSP)
+
+```
+Il n'y a pas de différence significative dans la composition des deux échantillons (chi2 = `r round(x2$statistic, 2)`, p = `r round(x2$p.value, 2)`).
+
 
 Analyse univariée
 =================
 
-Durée de la formation
----------------------
-```{r}
-summary(d$DUREE)
-```
-
-
 Catégorie socio-professionnelle
 -------------------------------
 
-```{r}
+```{r, echo=FALSE, comment=""}
 summary(d$CSP)
 ```
 
 Ville
 -----
-```{r}
+```{r, echo=FALSE, comment=""}
 summary(d$VILLE)
 
 table(d$VILLE, d$CSP)
 chisq.test(d$VILLE, d$CSP)
 
-
-table(d$VILLE, d$DUREE)
-fisher.test(d$VILLE, d$DUREE)
-
 ```
 
-Likert
-======
+Nombre de personnels formés au risque Ebola
+--------------------------------------------
+```{r}
+t <- table(d$CSP , d$FORME)
+t
 
-questions 1.2.12.14.15 traitent du niveau d'information (1 et2) et du niveau de formation (12.14.15)
+barplot(t(t), beside = TRUE, main = "Nombre de personnels formés", ylab = "Fréquence")
+legend("top", legend = c("Formés", "Non formés"), col = c("gray80", "gray20"), pch = 15, bty = "FALSE")
 
-Niveau d'information
---------------------
+# chisq.test(t)
+f <- fisher.test(t)
+f
+```
+
+Il y a une différence: le nombre de non formés est plus important dans la catégorie IDE (p = `r round(f$p.value, 3)`).
+
+Nombre de personnels formés au risque Ebola selon la ville
+--------------------------------------------
+
+```{r}
+t <- table(d$VILLE , d$FORME)
+t
+
+barplot(t(t), beside = TRUE, main = "Nombre de personnels formés", ylab = "Fréquence")
+
+legend("top", legend = c("Formés", "Non formés"), col = c("gray80", "gray20"), pch = 15, bty = "FALSE")
+
+c <- chisq.test(t)
+c
+```
+
+Il y a plus de personnels formés à Strasbourg (p = `r round(c$p.value, 3)`) qu'à Reims.
+
+Durée de la formation
+---------------------
+```{r, echo=FALSE, comment=""}
+summary(d$DUREE)
+
+table(d$VILLE, d$DUREE)
+x2 <- chisq.test(d$VILLE, d$DUREE)
+x2
+
+# fusion des 2 dernières colonnes pour avoir des effectifs > 5
+t <- table(d$VILLE, d$DUREE)
+t2 <- apply(t[,3:4], 1, sum) # fusion
+t3 <- cbind(t[, 1:2], t2) # associe les colonnes 1:2 et la fusion
+chisq.test(t3)
+
+
+# test exact de Fisher
+table(d$VILLE, d$DUREE)
+fisher.test(d$VILLE, d$DUREE)
+```
+Il existe une différence significative entre Strasbourg et Reims pour la variable durée.
+
+Analyse de l'échelle d'anxiété
+==============================
+
+Score global (somme des 15 items de Likert)
+-------------------------------------------
+
+Le score global peut être interprété comme le degré de confiance d'un personnel hospitalier pour la prise en charge d'un patient suspect d'Ebola.
+
+```{r, echo=FALSE, message=FALSE, comment="", warning=FALSE}
+sg <- d[, 2:16]
+score.max.theo <- ncol(sg) * 7
+score.min.theo <- 7
+# inversion des réponses de la question 6
+# estime$QUEST.6 <- rev.likert(estime$QUEST.6, 7)
+d$QUEST.6 <- rev.likert(d$QUEST.6, 7)
+
+# aspect graphique
+l <- likert(sg, nlevels = 7)
+l
+plot(likert(sg, nlevels = 7))
+
+# on crée 4 colonnes supplémentaires:
+# - score total (sg)
+# - score estime de soi (ESTIME)
+# - score presse (PRESSE)
+# - score formation (FORMATION)
+# - score inquiétude face à eboma (FEAR)
+
+# ajout colonne score
+sg$score <- apply(sg, 1, sum)
+summary(sg$score)
+sd(sg$score)
+hist(sg$score, main = "Score Ebola", ylab = "Fréquence", xlab = "Score", col = "cornflowerblue", border = "white")
+
+# ajout de la colonne score.tot à d
+d$score.tot <- sg[, "score"]
+
+# ajout d'une colonne ESTIME pour le score estime de soi
+estime <- d[, 7:12]
+score.estime <- apply(estime, 1, sum) # score  = total de la ligne
+d$ESTIME <- score.estime
+
+# Ajout colonne score PRESSE
+score.presse <- apply(d[, 2:3], 1, sum)
+d$PRESSE <- score.presse
+
+# Ajout colonne FORMATION
+formation <- d[, c(13, 15:16)]
+score.formation <- apply(formation, 1, sum)
+d$FORMATION <- score.formation
+
+# Ajout colonne FEAR = inquiétude provoquée par Ebola
+sent <- d[, c(4:6,14)]
+score.sent <- apply(sent, 1, sum)
+d$FEAR <- score.sent
+```
+
+Le score  global peut varier entre `r score.min.theo` et `r score.max.theo`. 
+
+### Comparaisons des villes
+
+```{r, echo=FALSE, comment=""}
+# comparaison des villes
+t.villes <- t.test(d$score.tot ~ d$VILLE)
+t.villes
+p.villes <- t.villes$p.value
+```
+
+Le score total moyen n'est pas différent entre Reims et Strasbourg (p = `r round(p.villes, 2)`)
+
+### comparaison des CSP
+```{r, echo=FALSE, comment=""}
+# comparaison des CSP
+tapply(d$score.tot, d$CSP, mean)
+aov.csp <- summary(aov(d$score.tot ~ d$CSP))
+p.csp <- aov.csp[[1]][5]$"Pr(>F)"[1]
+```
+
+Le score total moyen n'est pas différent entre les professions (p = `r round(p.csp, 2)`)
+
+### Score total et formation
+
+La catégorie IDE est celle qui comporte le plus de personnel non formé. Le score total est-il différent entre le groupe personnels formées et non formées ?
+
+```{r}
+t <- t.test(d$score.tot ~ d$FORME)
+t
+
+b <- boxplot(d$score.tot ~ d$FORME, names = c("Personnels non formés", "Personnels formés"), ylab = "Score total", col = "palegreen", main = "Comparaison des scores totaux des personnelsformés et non formés")
+
+text(1.5, 80, paste0("p = ", round(t$p.value, 3)))
+```
+
+Il ya une différence significative en ce qui concerne le score total, selon que les personnels aient eu ou non une formation. Les personnels non formés ont un score inférieur aux personnels formés.
+
+### comparaison de l'ancienneté de la formation
+
+```{r, echo=FALSE, comment=""}
+# durée formation
+tapply(d$score.tot, d$DUREE, mean)
+fit <- aov(d$score.tot ~ d$DUREE)
+summary(fit)
+
+plotmeans(d$score.tot ~ d$DUREE, xlab = "Durée", ylab = "Score moyen", main = "Moyenne des score totaux en fonction de l'ancienneté de la formation\n(avec intervalle de confiance à 95%)")
+TukeyHSD(fit)
+```
+
+
+### Conclusions: 
+
+- il n'y a pas de différence entre le score total de Strasbourg et de Reims (p = `r round(p.villes, 2)`), ni entre les différentes CSP (p = `r round(p.csp, 2)`).
+- le score global est d'autant plus élevé que le personnel est formé et la formation est récente (mois de 6 mois). Il y a une différence significative entre les formés et les non formés. Dans le groupe des personnels formé, la confiance semble s'estomper avec le temps bien que cette tendance ne soit pas significative (aspect graphique).
+
+
+
+Niveau d'information (1.2)
+====================
 
 QUEST.1: Je me tiens au courant des dernières informations de la presse télévisée concernant le virus Ebola
 
 QUEST.2: Je me tiens au courant des dernières informations de la presse écrite concernant le virus Ebola
 
-```{r}
+```{r, echo=FALSE, comment="", warning=FALSE}
 summary(d$QUEST.1, na.rm = TRUE)
 summary(d$QUEST.2, na.rm = TRUE)
 tapply(d$QUEST.1, d$VILLE, mean)
@@ -80,21 +313,263 @@ l <- likert(info, nlevels = 7)
 l
 plot(l)
 
+# score presse
+score.presse <- apply(d[, 2:3], 1, sum)
+summary(score.presse)
+hist(score.presse, main = "Score information par la presse", ylab = "Fréquence", xlab = "Score", col = "cornflowerblue", border = "white")
+d$score.presse <- score.presse
+table(d$CSP, d$score.presse)
+
+barplot(table(d$CSP, d$score.presse), main = "Information par la presse", xlab = "Score", ylab = "Fréquence", col = c(1:4))
+legend("topright", legend = levels(d$CSP), col = 1:4, bty = "n", pch = 15)
+
+barplot(table(d$CSP, d$score.presse), main = "Information par la presse", xlab = "Score", ylab = "Fréquence", col = c(1:4), beside = TRUE)
+legend("topright", legend = levels(d$CSP), col = 1:4, bty = "n", pch = 15)
+
+# pas de différence entre les villes
+t.test(d$score.presse ~ d$VILLE)
+
+# pas de différence CSP
+fit <- aov(score.presse ~ VILLE, data = d)
+summary(fit)
+
+# pas de différence DUREE
+fit <- aov(score.presse ~ DUREE, data = d)
+summary(fit)
+
 ```
 
 Niveau de formation (12.14.15)
--------------------
+==============================
 
-12. Je pense être suffisamment informé(e) quant aux modes de transmissions du virus Ebola
 
-14. Je pense être suffisamment formé(e) pour m’habiller avec la tenue de protection face au virus Ebola
+Quel est le sentiment des personnels vis à vis de leur information/formation face à ce risque ? On étudie le score formé par les questions 12, 14 et 15, appelé __niveau de formation__.
 
-15. Je pense être suffisamment formé(e) pour ôter la tenue de protection face au virus Ebola
+- [12] Je pense être suffisamment informé(e) quant aux modes de transmissions du virus Ebola
+
+- [14] Je pense être suffisamment formé(e) pour m’habiller avec la tenue de protection face au virus Ebola
+
+- [15] Je pense être suffisamment formé(e) pour ôter la tenue de protection face au virus Ebola
+
+```{r, echo=FALSE, comment="", warning=FALSE}
+formation <- d[, c(13, 15:16)]
+score.formation <- apply(formation, 1, sum)
+summary(score.formation)
+hist(score.formation, main = "Score formation", ylab = "Fréquence", xlab = "Score", col = "cornflowerblue", border = "white")
+d$score.formation <- score.formation
+
+l <- likert(formation, nlevels = 7)
+l
+plot(l)
+
+### Comparaisons des villes
+```{r, echo=FALSE, comment=""}
+# comparaison des villes
+t.villes <- t.test(d$score.formation ~ d$VILLE)
+t.villes
+p.villes <- t.villes$p.value
+```
+
+### comparaison des CSP
+```{r, echo=FALSE, comment=""}
+# comparaison des CSP
+tapply(d$score.formation, d$CSP, mean)
+aov.csp <- summary(aov(d$score.formation ~ d$CSP))
+aov.csp
+p.csp <- aov.csp[[1]][5]$"Pr(>F)"[1]
+
+plotmeans(d$score.formation ~ d$CSP, xlab = "Durée", ylab = "Score moyen", main = "Moyenne des score totaux en fonction du niveau de formation\n(avec intervalle de confiance à 95%)")
+TukeyHSD(aov(d$score.formation ~ d$CSP))
+
+```
+
+### Selon la formation au risque Ebola
+
+Quel est le sentiment des personnels vis à vis de leur information/formation face à ce risque ? On étudie le score formé par les questions 12, 14 et 15, appelé niveau de formation.
 
 ```{r}
-formation <- d[, c(13, 15:16)]
-l <- likert(formation, nlevels = 7)
+
+t <- t.test(d$FORMATION ~ d$FORME)
+t
+boxplot(d$FORMATION ~ d$FORME, names = c("Personnels non formés", "Personnels formés"), ylab = "Score formation", col = "palegreen", main = "sentiment des IDE vis à vis de leur information/formation")
+
+```
+
+Différence fortement significative (p = `r round(t$p.value, 5)`).
+
+
+### comparaison des durées
+```{r, echo=FALSE, comment=""}
+# durée formation
+tapply(d$score.formation, d$DUREE, mean)
+fit <- aov(d$score.tot ~ d$DUREE)
+summary(fit)
+plotmeans(d$score.formation ~ d$DUREE, xlab = "Durée", ylab = "Score formation", main = "Moyenne des score totaux en fonction du niveau de formation\n(avec intervalle de confiance à 95%)")
+TukeyHSD(fit)
+```
+
+Sentiment d'inquiétude provoqué par ebola
+============================
+questions 3.4.5.13 traitent du sentiment d'inquiétude provoqué par ebola
+
+3. Le virus Ebola est une chose qui me préoccupe sur le plan professionnel
+4. Si j’avais le choix, je refuserais de prendre en charge un patient suspecté d’être contaminé par le virus Ebola
+5. Le virus Ebola est une chose qui me préoccupe sur le plan personnel et par rapport à mes proches
+13. J’ai très peur à l’idée de devoir prendre en charge un patient suspecté d’être contaminé par le virus Ebola
+
+```{r, echo=FALSE, comment="", warning=FALSE}
+sent <- d[, c(4:6,14)]
+score.sent <- apply(sent, 1, sum)
+summary(score.sent)
+hist(score.sent, main = "Score sentiment face à Ebola", ylab = "Fréquence", xlab = "Score", col = "cornflowerblue", border = "white")
+d$score.sent <- score.sent
+
+l <- likert(sent, nlevels = 7)
 l
 plot(l)
 ```
 
+Les 61% des personnels se sentent concernés par la problématique Ebola (question 3). Sur les autre items de ce sous-groupes, les inquiets et les non inquiets se partagent de manière assez équivalente.
+
+### Comparaisons des villes
+```{r, echo=FALSE, comment=""}
+# comparaison des villes
+t.villes <- t.test(d$score.sent ~ d$VILLE)
+t.villes
+p.villes <- t.villes$p.value
+```
+
+L'inquiétude semble légèrement plus importante à Reims, mais la différence entre les deux villes n'est pas significative (p = 0.0869).
+
+### comparaison des CSP
+```{r, echo=FALSE, comment=""}
+# comparaison des CSP
+tapply(d$score.sent, d$CSP, mean)
+aov.csp <- summary(aov(d$score.sent ~ d$CSP))
+aov.csp
+p.csp <- aov.csp[[1]][5]$"Pr(>F)"[1]
+```
+
+Aucune différence entre les CSP (p = 0.416).
+
+### comparaison de l'ancienneté de la formation:
+
+On considère 4 groupes:
+
+- pas formation (NON)
+- moins de 6 mois
+- 6 à 12 mois
+- plus de 12 mois
+
+```{r, echo=FALSE, comment=""}
+# durée formation
+tapply(d$score.sent, d$DUREE, mean)
+fit <- aov(d$score.tot ~ d$DUREE)
+summary(fit)
+plotmeans(d$score.sent ~ d$DUREE, xlab = "Durée", ylab = "Score moyen", main = "Moyenne des score totaux en fonction du sentiment provoqué par Ebola\n(avec intervalle de confiance à 95%)")
+TukeyHSD(fit)
+```
+
+Le niveau d'inquiétude n'est pas le même entre les groupes (p = 0.00008). L'inquiétude est la plus élevée dans le groupe des personnes non formées et le score d'inquiétude est statistiquement plus élevé que celui des personnes formées depuis moins de 6 mois (p = 0.0000308)
+
+estime de soi
+=============
+questions 6.7.8.9.10.11 traitent de l'estime de soi
+
+6. J’ai peur de ne pas être à la hauteur si je dois prendre en charge un patient suspecté d’être contaminé par le virus Ebola
+7. Je me sens confiant(e) quant à mes capacités à collaborer avec les autres professionnels de santé lors de la prise en charge d’un patient suspecté d’être contaminé par le virus Ebola
+8. Je me sens confiant(e) quant à mes capacités à prendre en charge un patient suspecté d’être contaminé par le virus Ebola
+9. Je suis sûr(e) de pouvoir garder mon calme lors de la prise en charge d’un patient suspecté d’être contaminé par le virus Ebola
+10. Je me sens confiant(e) quant à mes capacités à assurer les soins nécessaires lors de la prise en charge d’un patient suspecté d’être contaminé par le virus Ebola
+11. Je me sens confiant(e) quant à mes capacités à pouvoir me protéger lors de la prise en charge d’un patient suspecté d’être contaminé par le virus Ebola
+
+
+```{r, echo=FALSE, comment="", warning=FALSE}
+estime <- d[, 7:12]
+
+# score  = total de la ligne
+score.estime <- apply(estime, 1, sum)
+
+# ajout d'une colonne ESTIME 
+d$ESTIME <- score.estime
+
+summary(score.estime)
+hist(score.estime, main = "Score Estime de soi", ylab = "Fréquence", xlab = "Score", col = "cornflowerblue", border = "white")
+d$score.estime <- score.estime
+
+l <- likert(estime, nlevels = 7)
+l
+plot(l)
+
+### Comparaisons des villes
+```{r, echo=FALSE, comment=""}
+# comparaison des villes
+t.villes <- t.test(d$score.estime ~ d$VILLE)
+t.villes
+p.villes <- t.villes$p.value
+```
+Globalement les personnes interrogées ont une bonne estime d'eux concernant leur professionalisme concernant la prise en charge de ce type de patient (question 9, 74% d'opinion favorable) et leur capacité à travailler avec d'autres professionnels de santé (question 7, 61% d'opinion favorable). Les opinions sont plus mesurées concernant la capacité à assurer des soins (q10) et à se protéger (q11) avec 55% et 50% d'opinion favorable. Cet optimisme prudent peut s'expliquer à l'absence de confrontation avec des cas réels. La question 6 avec moins de 50% d'opinion favorables tempère l'optimisme des question 9 et 7. En résumé une attitude plutôt raisonnable, sans triomphalisme ni d'inquiétute excessifs.
+
+Ce sentiment est partagé par les professionnels des deux villes (pas de différence, p = 0.29  )
+
+### comparaison des CSP
+```{r, echo=FALSE, comment=""}
+# comparaison des CSP
+tapply(d$score.estime, d$CSP, mean)
+aov.csp <- summary(aov(d$score.estime ~ d$CSP))
+aov.csp
+p.csp <- aov.csp[[1]][5]$"Pr(>F)"[1]
+
+plot(d$score.estime ~ d$CSP, ylab = "Estime de soi", main = "Estime de soi et profession")
+
+TukeyHSD(aov(d$score.estime ~ d$CSP))
+
+```
+
+Les IADE ont le score d'esime de soi le plus élevé. Il n'y a pas de différence significative entre les CSP on est très proche d'une différence significative (p = `r p.csp`). 
+
+### Estime de soi et formation
+
+```{r}
+t <- t.test(d$ESTIME ~ d$FORME)
+t
+
+boxplot(d$ESTIME ~ d$FORME, names = c("Non formés", "Formés"), ylab = "Estime de soi", main = "Estime de soi et formation à la prise en charge d'un cas d'Ebola")
+abline(h = mean(d$ESTIME), lty = 2, col = "red")
+legend("topleft", legend = "Score moyen", lty = 2, col = "red", bty = "n")
+
+```
+Il y a une différence fortement significative (p = `r round(t$p.value, 3)`) entre les groupes. Les personnes formées ont un sentiment d'estime de soi supérieur à celui des personnes non formées.
+
+### comparaison des durées
+```{r, echo=FALSE, comment=""}
+# durée formation
+tapply(d$score.estime, d$DUREE, mean)
+fit <- aov(d$score.estime ~ d$DUREE)
+summary(fit)
+plotmeans(d$score.estime ~ d$DUREE, xlab = "Ancienneté de la formation en mois (NON = non formés)", ylab = "Score estime de soi", main = "Moyenne des score totaux en fonction de l'estime de soi\n(avec intervalle de confiance à 95%)")
+TukeyHSD(fit)
+
+```
+
+Le fait d'être formé ou pas influence l'estime de soi. Les personnels non formés ont le score de confiance les plus bas (23,07) et ce score est statistiquement différent du score des personnels formés depuis moins de 6 mois (p = 0.00033). La comparaison avec les personnes formées il a plus de 6 mis ou de 12 mois est de peu de valeur compte tenu de la faiblesse des effectifs.
+
+Si on forme 3 groupes en regrouppant les personnes formées depuis 6 mois ou plus:
+
+- pas de formation (NON)
+- moins de 6 mois
+- plus de 6 mois
+
+la différence est plus nette:
+```{r, echo=FALSE}
+d$DUREE2 <- as.character(d$DUREE)
+d$DUREE2[d$DUREE2 == "6-12"] <- "> 6"
+d$DUREE2[d$DUREE2 == ">12"] <- "> 6"
+tapply(d$score.estime, d$DUREE2, mean)
+plotmeans(d$score.estime ~ d$DUREE2, xlab = "Ancienneté de la formation en mois (NON = non formés)", ylab = "Score estime de soi", main = "Moyenne des score totaux en fonction de l'estime de soi\n(avec intervalle de confiance à 95%)")
+fit <- aov(d$score.estime ~ d$DUREE)
+summary(fit)
+TukeyHSD(fit)
+
+```
+Au moins un des score est différent des autres (p = 0.0007). Le test de Tukey révèle que le score d'estime de soi des personnes non formées est statistiquement plus faible que celui des personnes formées, que ce soit à 6 mois (p = 0.00001) ou plus de 6 mois (p = 0.04). Par contre il n'y a pas de différence entre les score des personnels formés à 6mois et plus de 6 mois (p = 0.41).
